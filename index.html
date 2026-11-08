@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WONDERLAND — The Mystery of Knowledge</title>
+    <style>
+      :root {
+        --bg-dark: #071722;
+        --bg-panel: rgba(11, 20, 30, 0.82);
+        --line: rgba(255,255,255,0.12);
+        --text: #edf7ff;
+        --muted: #cae2f7;
+        --gold: #f5d37c;
+        --green: #7ee4b1;
+        --blue: #8bbdff;
+        --purple: #b39cff;
+        --danger: #ff7d95;
+        --shadow: rgba(0,0,0,0.36);
+      }
+
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: radial-gradient(circle at top, #143149, #050d15 55%, #030a12 100%);
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        overflow: hidden;
+      }
+
+      body { min-height: 100vh; }
+      button, input { font: inherit; }
+      button {
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 0.9rem 1.2rem;
+        background: rgba(255,255,255,0.04);
+        color: var(--text);
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      }
+      button:hover {
+        transform: translateY(-1px);
+        border-color: rgba(255,255,255,0.18);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+      }
+      button.primary { background: linear-gradient(135deg, #9bf3c7, #96c4ff); color: #072439; font-weight: 700; }
+      #app { position: relative; width: 100vw; height: 100vh; }
+      .screen { position: absolute; inset: 0; display: none; }
+      .screen.active { display: block; }
+
+      #splash {
+        background: radial-gradient(circle at center, rgba(142, 209, 255, 0.3), rgba(8,17,26,0.94) 46%, rgba(2,7,13,1));
+      }
+      .splash-wrap {
+        height: 100%;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        position: relative;
+      }
+      .splash-wrap::before {
+        content: "";
+        position: absolute;
+        inset: 10% 12% 10% 12%;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(204,223,255,0.22), transparent 68%);
+        animation: glow 3.5s ease-in-out infinite;
+      }
+      .logo-block {
+        position: relative;
+        z-index: 1;
+      }
+      .logo-main {
+        font-size: clamp(2.6rem, 6vw, 6rem);
+        letter-spacing: 0.18em;
+        font-weight: 900;
+        text-shadow: 0 0 35px rgba(168, 216, 255, 0.8);
+      }
+      .logo-sub {
+        letter-spacing: 0.34em;
+        font-size: clamp(0.8rem, 1.7vw, 1.3rem);
+        opacity: 0.8;
+      }
+      .loader {
+        display: flex; justify-content: center; gap: 0.7rem; margin-top: 2rem;
+      }
+      .loader span {
+        width: 12px; height: 12px; border-radius: 50%;
+        background: linear-gradient(135deg, #f9d77e, #d7f6ff);
+        animation: bounce 1.2s infinite ease-in-out;
+      }
+      .loader span:nth-child(2) { animation-delay: 0.14s; }
+      .loader span:nth-child(3) { animation-delay: 0.28s; }
+
+      #menu {
+        background: linear-gradient(180deg, rgba(4, 11, 17, 0.08), rgba(4, 8, 12, 0.72)),
+                    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 900'%3E%3Crect fill='%23132536' width='1400' height='900'/%3E%3Ccircle cx='210' cy='170' r='120' fill='%23c9e7ff' opacity='0.4'/%3E%3Cpath d='M0 560 C200 430, 320 500, 500 470 S790 400, 1400 500 L1400 900 L0 900 Z' fill='%2347b57b' opacity='0.8'/%3E%3Cpath d='M0 620 C220 600, 420 690, 630 650 S980 530, 1400 620 L1400 900 L0 900 Z' fill='%2327a678' opacity='0.85'/%3E%3Cpath d='M0 290 L160 210 L320 260 L540 200 L700 250 L920 170 L1200 300 L1400 260 L1400 420 L0 440 Z' fill='%237ac7f7' opacity='0.25'/%3E%3C/svg%3E") center/cover no-repeat;
+      }
+      .menu-panel {
+        position: absolute; inset: 0; display: grid; place-items: center;
+      }
+      .menu-card {
+        width: min(560px, 88vw);
+        text-align: center;
+        padding: 2rem 2.5rem 2.2rem;
+        border-radius: 28px;
+        background: rgba(7,16,23,0.62);
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+      }
+      .menu-brand {
+        display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1.2rem;
+      }
+      .brand-mark {
+        width: 70px; height: 70px; display: grid; place-items: center; border-radius: 50%;
+        background: linear-gradient(135deg, rgba(245,211,124,0.9), rgba(179,156,255,0.8));
+        font-size: 2rem; box-shadow: 0 0 35px rgba(245,211,124,0.4);
+      }
+      .menu-eyebrow {
+        margin: 0; font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.8;
+      }
+      .menu-title {
+        margin: 0.35rem 0 0; font-size: clamp(2.2rem, 4vw, 4rem); letter-spacing: 0.16em;
+      }
+      .menu-buttons {
+        display: grid; gap: 0.8rem; margin-top: 1.2rem;
+      }
+      .menu-buttons button { min-height: 52px; }
+
+      #story {
+        background: linear-gradient(120deg, #0c1b2c, #1e2338 44%, #7d768b 100%);
+      }
+      .story-card {
+        width: min(900px, 90vw);
+        margin: 10vh auto auto;
+        padding: 2rem 2rem 1.7rem;
+        border-radius: 24px;
+        background: rgba(8,16,24,0.7);
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 28px 40px rgba(2,7,13,0.35);
+      }
+      .story-card h2 {
+        margin: 0.5rem 0 1rem; font-size: clamp(1.8rem, 3vw, 3rem);
+      }
+      #storyText {
+        color: var(--muted);
+        line-height: 1.9;
+        font-size: 1.08rem;
+      }
+      .story-actions {
+        margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; flex-wrap: wrap;
+      }
+
+      .topbar {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0.9rem 1rem;
+        background: rgba(8,16,24,0.78);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(8px);
+      }
+      .topbar-brand { font-weight: 800; letter-spacing: 0.15em; }
+      .topbar-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+
+      .map-shell {
+        height: calc(100% - 64px);
+        display: grid; place-items: center;
+        background: linear-gradient(rgba(10,18,25,0.18), rgba(10,18,25,0.2)),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 900'%3E%3Crect fill='%230c1830' width='1400' height='900'/%3E%3Cpath d='M100 670 C270 560, 340 430, 540 430 S870 550, 1040 470 S1245 260, 1310 220 L1310 900 L100 900 Z' fill='%2355c08b' opacity='0.38'/%3E%3Cpath d='M140 700 C270 620, 420 620, 590 560 S890 460, 1145 520 S1275 410, 1300 360 L1300 900 L140 900 Z' fill='%23388dad' opacity='0.42'/%3E%3Cpath d='M300 200 C446 110, 560 170, 640 130 S930 50, 1045 120 S1170 230, 1240 210 L1240 450 C1100 500 1030 480 930 520 S730 590 520 540 S240 510 170 480 Z' fill='%239be7ff' opacity='0.16'/%3E%3C/svg%3E") center/cover no-repeat;
+      }
+      .map-viewport {
+        position: relative; width: min(1200px, 96vw); height: min(760px, 86vh);
+        overflow: hidden; border-radius: 26px; border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(6,15,22,0.28); box-shadow: inset 0 0 35px rgba(139,189,255,0.08);
+      }
+      #worldMap { position: absolute; inset: 0; transform-origin: center; cursor: grab; }
+      .region-card {
+        position: absolute; transform: translate(-50%, -50%); width: 170px; min-height: 90px;
+        padding: 0.8rem 0.8rem 0.6rem; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(9,30,42,0.42); box-shadow: 0 18px 30px rgba(0,0,0,0.22); text-align: left;
+      }
+      .region-card.locked { opacity: 0.46; filter: grayscale(0.25); }
+      .region-card.active { border-color: rgba(245,211,124,0.9); box-shadow: 0 0 24px rgba(245,211,124,0.4); }
+      .region-card .dot { display: block; width: 12px; height: 12px; border-radius: 50%; margin-bottom: 0.45rem; }
+      .region-card strong { display: block; font-size: 0.98rem; }
+      .region-card small { color: var(--muted); }
+
+      .explore-scene {
+        position: relative; height: calc(100% - 64px - 96px); overflow: hidden;
+      }
+      .explore-scene.world-sunny-meadow { background: linear-gradient(180deg, rgba(152,220,158,0.82), rgba(42,105,83,0.9)); }
+      .explore-scene.world-whispering-forest { background: linear-gradient(180deg, rgba(120,170,210,0.8), rgba(14,21,35,0.9)); }
+      .explore-scene.world-forgotten-village { background: linear-gradient(180deg, rgba(146,130,114,0.8), rgba(21,19,28,0.92)); }
+      .explore-scene.world-shadow-castle { background: linear-gradient(180deg, rgba(102,90,148,0.85), rgba(13,18,26,0.92)); }
+      .explore-scene.world-misty-swamp { background: linear-gradient(180deg, rgba(95,122,106,0.8), rgba(8,27,32,0.9)); }
+      .explore-scene.world-lost-kingdom { background: linear-gradient(180deg, rgba(119,108,186,0.82), rgba(15,16,32,1)); }
+      .mission-layer { position: absolute; inset: 0; }
+      .mission-marker {
+        position: absolute; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle, #f9eaa2, #f2b65a);
+        border: 2px solid rgba(255,255,255,0.8); box-shadow: 0 0 18px rgba(249,234,162,0.7); transform: translate(-50%, -50%);
+      }
+      .mission-marker::after {
+        content: ""; position: absolute; inset: -10px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.46);
+        animation: pulse 1.8s infinite ease-out;
+      }
+      .player-avatar {
+        position: absolute; left: 12%; top: 62%; width: 44px; height: 44px; display: grid; place-items: center;
+        border-radius: 50%; background: linear-gradient(135deg, #d3ecff, #94dfcc, #f2d785);
+        color: #0a2436; font-weight: 900; border: 2px solid rgba(255,255,255,0.7); box-shadow: 0 0 20px rgba(140,196,255,0.5);
+        transition: left 0.2s ease, top 0.2s ease, transform 0.18s ease;
+      }
+      .player-avatar.walking { transform: scale(1.08); }
+      .explore-controls {
+        background: rgba(8,16,24,0.6); padding: 1rem 0 1.2rem; display: flex; justify-content: center;
+      }
+      .dpad { display: inline-grid; gap: 0.5rem; }
+      .dpad-row { display: flex; gap: 0.5rem; }
+      .dpad button { width: 56px; height: 52px; }
+
+      #challengeScreen { background: radial-gradient(circle at top, rgba(154,180,255,0.16), rgba(6,13,20,0.88) 42%, rgba(3,8,13,1)); }
+      .challenge-box {
+        width: min(950px, 90vw); margin: 3vh auto; padding: 1.2rem; border-radius: 28px;
+        background: rgba(8,17,25,0.9); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 22px 40px rgba(0,0,0,0.25);
+      }
+      .challenge-header {
+        display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem;
+      }
+      .challenge-header p { margin: 0; letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.72rem; opacity: 0.72; }
+      .challenge-header h3 { margin: 0.4rem 0 0; font-size: clamp(1.5rem, 2vw, 2.5rem); }
+      .life-row { display: flex; align-items: center; gap: 0.6rem; }
+      .life-row .heart { font-size: 1.3rem; }
+      .challenge-content { min-height: 310px; }
+      .challenge-card {
+        padding: 1.2rem; border-radius: 18px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      }
+      .challenge-card h4 { margin-top: 0; margin-bottom: 1rem; font-size: 1.2rem; }
+      .option-grid { display: grid; gap: 0.8rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+      .option-btn { text-align: left; }
+      .option-btn.correct { background: rgba(126,228,177,0.22); border-color: rgba(126,228,177,0.9); }
+      .option-btn.wrong { background: rgba(255,125,149,0.24); border-color: rgba(255,125,149,0.9); }
+      .sequence-list { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+      .sequence-item { padding: 0.75rem 1rem; border-radius: 999px; background: rgba(255,255,255,0.04); }
+      .drag-surface { display: grid; gap: 0.8rem; }
+      .drag-options, .drop-slots { display: flex; flex-wrap: wrap; gap: 0.7rem; min-height: 60px; }
+      .drag-piece, .drop-slot {
+        min-width: 120px; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.04);
+        border: 1px dashed rgba(255,255,255,0.18); text-align: center;
+      }
+      .drop-slot { display: grid; place-items: center; }
+      .challenge-footer { display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; margin-top: 1.2rem; }
+      .text-input { width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.03); color: var(--text); }
+
+      .panel {
+        position: absolute; inset: 0; display: grid; place-items: center; background: rgba(5, 10, 18, 0.56); z-index: 30;
+      }
+      .panel.hidden { display: none; }
+      .panel-card {
+        width: min(720px, 90vw); padding: 1.3rem; border-radius: 24px; background: rgba(9,18,26,0.95);
+        border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 24px 40px rgba(0,0,0,0.32);
+      }
+      .panel-header {
+        display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem;
+      }
+      .icon-button { width: 40px; height: 40px; border-radius: 50%; padding: 0; }
+      .profile-grid { display: grid; grid-template-columns: 180px 1fr; gap: 1rem; }
+      .avatar-box {
+        display: grid; place-items: center; text-align: center; padding: 1rem; border-radius: 18px; background: rgba(255,255,255,0.03);
+      }
+      .avatar-shape {
+        width: 96px; height: 96px; display: grid; place-items: center; border-radius: 50%;
+        background: linear-gradient(135deg, #d1e4ff, #8ec7ff, #b6e9c9); color: #0f2c45; font-size: 2.2rem; font-weight: 900;
+      }
+      .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(120px, 1fr)); gap: 0.8rem; }
+      .stat-box { padding: 0.9rem 1rem; border-radius: 14px; background: rgba(255,255,255,0.03); }
+      .stat-box span { display: block; opacity: 0.72; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.14em; }
+      .inventory-row { display: grid; grid-template-columns: repeat(3, minmax(100px, 1fr)); gap: 0.8rem; margin-top: 1rem; }
+      .inventory-row > div { padding: 0.9rem 1rem; border-radius: 14px; background: rgba(255,255,255,0.03); }
+      .range-row { margin-bottom: 1rem; }
+      .range-row label { display: grid; gap: 0.4rem; margin-bottom: 0.8rem; }
+      input[type="range"] { width: 100%; }
+      .toggle-row { display: flex; justify-content: space-between; align-items: center; margin: 1rem 0 1.2rem; }
+
+      #victoryScreen { background: radial-gradient(circle at center, rgba(135,198,255,0.18), rgba(5,10,18,0.85) 40%, rgba(2,7,12,1)); }
+      .victory-scene {
+        position: relative; height: 100%; display: grid; place-items: center; text-align: center; overflow: hidden;
+      }
+      .crystal {
+        position: absolute; width: 200px; height: 200px; border-radius: 18% 18% 38% 38%;
+        transform: rotate(45deg); border: 10px solid rgba(245,211,124,0.8); background: linear-gradient(135deg, rgba(180,239,255,0.84), rgba(124,153,255,0.88), rgba(245,211,124,0.8));
+        box-shadow: 0 0 60px rgba(245,211,124,0.62); animation: crystalFloat 3.2s ease-in-out infinite;
+      }
+      .victory-copy { position: relative; z-index: 1; width: min(780px, 90vw); padding: 2rem; }
+      .victory-copy p { margin: 0; }
+      .victory-copy h2 { margin: 0.8rem 0 1rem; font-size: clamp(2.2rem, 4vw, 4rem); letter-spacing: 0.08em; }
+      .reward-list { display: flex; justify-content: center; gap: 0.8rem; flex-wrap: wrap; margin: 1.3rem 0; }
+      .reward-pill { padding: 0.6rem 0.95rem; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+
+      .defeat-box {
+        width: min(640px, 88vw); margin: auto; text-align: center; background: rgba(20,12,20,0.9); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 28px; padding: 2rem 1.5rem; box-shadow: 0 24px 40px rgba(0,0,0,0.3);
+      }
+      .defeat-badge {
+        width: 80px; height: 80px; margin: 0 auto 0.8rem; display: grid; place-items: center; border-radius: 50%;
+        background: linear-gradient(135deg, rgba(255,125,149,0.82), rgba(179,156,255,0.7)); font-size: 2rem;
+      }
+      .defeat-actions { display: flex; justify-content: center; gap: 0.7rem; margin-top: 1.1rem; flex-wrap: wrap; }
+
+      .toast {
+        position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%);
+        background: rgba(8,16,24,0.9); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 0.75rem 1rem;
+        box-shadow: 0 18px 28px rgba(0,0,0,0.28); z-index: 50;
+      }
+      .toast.hidden { display: none; }
+
+      @keyframes bounce { 0%,80%,100% { transform: translateY(0); opacity: 0.72; } 40% { transform: translateY(-14px); opacity: 1; } }
+      @keyframes glow { 0%,100% { opacity: 0.8; } 50% { opacity: 1; } }
+      @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
+      @keyframes crystalFloat { 0%,100% { transform: rotate(45deg) scale(1.04); } 50% { transform: rotate(45deg) scale(1.18); } }
+
+      @media (max-width: 720px) {
+        .profile-grid { grid-template-columns: 1fr; }
+        .inventory-row { grid-template-columns: 1fr; }
+        .story-card { margin-top: 8vh; }
+        .challenge-header, .challenge-footer { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="splash" class="screen active">
+        <div class="splash-wrap">
+          <div class="logo-block">
+            <div class="logo-main">WONDERLAND</div>
+            <div class="logo-sub">THE MYSTERY OF KNOWLEDGE</div>
+            <div class="loader"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="menu" class="screen">
+        <div class="menu-panel">
+          <div class="menu-card">
+            <div class="menu-brand">
+              <div class="brand-mark">✦</div>
+              <div>
+                <p class="menu-eyebrow">A fantasy educational adventure</p>
+                <h1 class="menu-title">WONDERLAND</h1>
+              </div>
+            </div>
+            <div class="menu-buttons">
+              <button class="primary" data-action="new-game">New Game</button>
+              <button data-action="continue-game">Continue</button>
+              <button data-action="open-settings">Settings</button>
+              <button data-action="open-credits">Credits</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="story" class="screen">
+        <div class="story-card">
+          <p class="menu-eyebrow">Cerita Awal</p>
+          <h2>Enam kristal pengetahuan telah kehilangan cahaya.</h2>
+          <div id="storyText"></div>
+          <div class="story-actions">
+            <button data-action="skip-story">Skip</button>
+            <button class="primary" data-action="next-story">Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="mapScreen" class="screen">
+        <header class="topbar">
+          <div class="topbar-brand">WONDERLAND</div>
+          <div class="topbar-actions">
+            <button data-action="open-profile">Profile</button>
+            <button data-action="show-menu">Menu</button>
+            <button data-action="open-settings">Settings</button>
+          </div>
+        </header>
+        <div class="map-shell">
+          <div class="map-viewport">
+            <div id="worldMap"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="exploreScreen" class="screen">
+        <header class="topbar">
+          <div class="topbar-brand">WONDERLAND</div>
+          <div class="topbar-actions">
+            <button data-action="return-map">Peta Dunia</button>
+            <button data-action="open-profile">Profile</button>
+          </div>
+        </header>
+        <div id="exploreScene" class="explore-scene world-sunny-meadow">
+          <div id="missionLayer" class="mission-layer"></div>
+          <div id="playerAvatar" class="player-avatar">A</div>
+        </div>
+        <div class="explore-controls">
+          <div class="dpad">
+            <button data-action="move" data-dir="up">▲</button>
+            <div class="dpad-row">
+              <button data-action="move" data-dir="left">◀</button>
+              <button data-action="move" data-dir="down">▼</button>
+              <button data-action="move" data-dir="right">▶</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="challengeScreen" class="screen">
+        <div class="challenge-box">
+          <div class="challenge-header">
+            <div>
+              <p id="challengeType">Misi</p>
+              <h3 id="challengeTitle">Challenge</h3>
+            </div>
+            <div class="life-row">
+              <span>Nyawa</span>
+              <div id="challengeLives"></div>
+            </div>
+          </div>
+          <div id="challengeContent" class="challenge-content"></div>
+          <div class="challenge-footer">
+            <button data-action="give-hint">Petunjuk</button>
+            <button data-action="leave-challenge">Keluar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="victoryScreen" class="screen">
+        <div class="victory-scene">
+          <div class="crystal"></div>
+          <div class="victory-copy">
+            <p id="victoryWorld">Sunny Meadow</p>
+            <h2>LEVEL COMPLETED</h2>
+            <p id="victoryQuote"></p>
+            <div id="victoryRewards" class="reward-list"></div>
+            <button class="primary" data-action="continue-victory">Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="defeatScreen" class="screen">
+        <div class="defeat-box">
+          <div class="defeat-badge">✦</div>
+          <h2>Misi Gagal</h2>
+          <p id="defeatText">Kamu kehilangan semua hati. Coba lagi dari checkpoint.</p>
+          <div class="defeat-actions">
+            <button class="primary" data-action="retry-mission">Retry</button>
+            <button data-action="return-map">Kembali ke Peta</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="profilePanel" class="panel hidden">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3>Profile & Inventory</h3>
+            <button class="icon-button" data-action="close-profile">✕</button>
+          </div>
+          <div class="profile-grid">
+            <div class="avatar-box">
+              <div class="avatar-shape" id="profileAvatar">A</div>
+              <p id="profileName">Explorer</p>
+            </div>
+            <div class="stats-grid">
+              <div class="stat-box"><span>LVL</span><strong id="profileLevel">1</strong></div>
+              <div class="stat-box"><span>XP</span><strong id="profileXp">0</strong></div>
+              <div class="stat-box"><span>Koin</span><strong id="profileCoins">0</strong></div>
+              <div class="stat-box"><span>Kristal</span><strong id="profileCrystals">0</strong></div>
+            </div>
+          </div>
+          <div class="inventory-row">
+            <div><small>Bintang</small><strong id="profileStars">0</strong></div>
+            <div><small>Achievement</small><strong id="profileAchievements">0</strong></div>
+            <div><small>Wilayah</small><strong id="profileWorlds">1/6</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="settingsPanel" class="panel hidden">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3>Settings</h3>
+            <button class="icon-button" data-action="close-settings">✕</button>
+          </div>
+          <div class="range-row">
+            <label>
+              <span>Volume Musik</span>
+              <input id="musicVolume" type="range" min="0" max="100" value="60" />
+            </label>
+            <label>
+              <span>Volume Efek Suara</span>
+              <input id="sfxVolume" type="range" min="0" max="100" value="80" />
+            </label>
+          </div>
+          <label class="toggle-row">
+            <span>Mute</span>
+            <input id="muteToggle" type="checkbox" />
+          </label>
+          <button class="primary" data-action="close-settings">Kembali</button>
+        </div>
+      </div>
+
+      <div id="toast" class="toast hidden"></div>
+    </div>
+
+    <script>
+      const WORLD_DATA = [
+        { id: 'sunny-meadow', name: 'Sunny Meadow', subtitle: 'Padang Rumput Cerah', x: 18, y: 24, accent: '#7ddf9d', quote: 'Langkah kecil hari ini adalah awal dari perjalanan luar biasa esok hari.' },
+        { id: 'whispering-forest', name: 'Whispering Forest', subtitle: 'Hutan Berkabut', x: 46, y: 30, accent: '#9ec8ff', quote: 'Di tengah kabut yang membingungkan, kamu tetap menemukan jalan.' },
+        { id: 'forgotten-village', name: 'Forgotten Village', subtitle: 'Desa yang Terlupakan', x: 28, y: 52, accent: '#d5b78a', quote: 'Misteri tidak selalu memiliki jawaban yang mudah. Namun, rasa ingin tahumu membawamu sampai di sini.' },
+        { id: 'shadow-castle', name: 'Shadow Castle', subtitle: 'Kastil Bayangan', x: 66, y: 48, accent: '#a699ff', quote: 'Kegelapan tidak mengalahkanmu. Justru di sinilah keberanian dan kecerdasanmu bersinar.' },
+        { id: 'misty-swamp', name: 'Misty Swamp', subtitle: 'Rawa Berkabut', x: 45, y: 72, accent: '#7dd8bc', quote: 'Jalan yang sulit tidak selalu berarti jalan yang salah. Kamu telah membuktikan bahwa ketekunan memiliki kekuatan.' },
+        { id: 'lost-kingdom', name: 'Lost Kingdom', subtitle: 'Kerajaan Tersesat', x: 76, y: 62, accent: '#f0d37d', quote: 'Kamu telah melewati setiap misteri, mengumpulkan setiap pengetahuan, dan membuktikan bahwa petualangan sejati tidak pernah berhenti pada satu kemenangan.' }
+      ];
+
+      const CHALLENGE_BANK = {
+        'sunny-meadow': [
+          { id: 'sunny-1', title: 'Mencocokkan Komputer', type: 'matching', question: 'CPU adalah organ utama pengolah data. Manakah yang paling tepat?', options: ['Pengolah pusat komputer', 'Penyimpanan data', 'Jaringan Wi‑Fi', 'Keyboard'], answer: 'Pengolah pusat komputer', explanation: 'CPU adalah unit pemroses utama yang menjalankan instruksi komputer.' },
+          { id: 'sunny-2', title: 'Urutan Langkah', type: 'sequence', question: 'Urutkan langkah yang benar untuk menulis dokumen sederhana.', options: ['Buka aplikasi', 'Tulis isi', 'Simpan dokumen', 'Cek hasil'], answer: ['Buka aplikasi', 'Tulis isi', 'Simpan dokumen', 'Cek hasil'], explanation: 'Langkah kerja yang logis harus berawal dari membuka aplikasi sampai mengecek hasilnya.' },
+          { id: 'sunny-3', title: 'Temukan Objek', type: 'hidden', question: 'Pilih benda yang berfungsi untuk memasukkan data ke komputer.', options: ['Monitor', 'Keyboard', 'Speaker', 'Router'], answer: 'Keyboard', explanation: 'Keyboard adalah alat input utama yang dipakai untuk mengetik dan memberi perintah.' },
+          { id: 'sunny-4', title: 'Kode Dasar', type: 'code', question: 'Pilih baris kode yang benar untuk menyimpan angka 7 dalam variabel.', options: ['let angka = 7;', 'const angka = "7";', 'angka == 7', 'if (angka = 7)'], answer: 'let angka = 7;', explanation: 'Variabel diinisialisasi dengan tanda sama dengan, lalu nilai disimpan.' },
+          { id: 'sunny-guardian', title: 'Guardian Challenge', type: 'logic', question: 'If 2, 4, 8, 16, maka angka berikutnya adalah...', options: ['18', '24', '32', '40'], answer: '32', explanation: 'Pola ini menggandakan angka setiap langkah. 16 x 2 = 32.', guardian: true }
+        ],
+        'whispering-forest': [
+          { id: 'forest-1', title: 'Pola Bilangan', type: 'logic', question: 'Bilangan berikut: 3, 6, 12, 24. Bilangan ke-5 adalah...', options: ['28', '30', '36', '48'], answer: '48', explanation: 'Setiap angka dikali 2, jadi 24 × 2 = 48.' },
+          { id: 'forest-2', title: 'Susun Kalimat', type: 'dragdrop', question: 'Susun kalimat yang benar.', options: ['pagi', 'hari', 'ini', 'ceria'], answer: ['pagi', 'ini', 'hari', 'ceria'], explanation: 'Urutan yang logis adalah “pagi ini hari ceria”.' },
+          { id: 'forest-3', title: 'Riddle Hutan', type: 'riddle', question: 'Aku berbentuk teks, aku dipakai untuk berkomunikasi, aku bisa singkat dan jelas. Aku adalah...', options: ['Peta', 'Pesan', 'Tabel', 'Buku'], answer: 'Pesan', explanation: 'Pesan adalah bentuk komunikasi singkat yang tertulis atau digital.' },
+          { id: 'forest-4', title: 'Kode Bahasa', type: 'code', question: 'Bagian program berikut adalah contoh dari apa? if (nilai > 10) { ... }', options: ['Percabangan', 'Perulangan', 'Variabel', 'Function'], answer: 'Percabangan', explanation: 'if adalah struktur percabangan yang menentukan jalur berdasarkan kondisi.' },
+          { id: 'forest-guardian', title: 'Guardian Challenge', type: 'matching', question: 'Kata “syntax” berkaitan dengan...', options: ['Kesalahan tata bahasa program', 'Ukuran file', 'Kecepatan komputer', 'Warna layar'], answer: 'Kesalahan tata bahasa program', explanation: 'Syntax adalah aturan penulisan program. Jika salah, program bisa error.', guardian: true }
+        ],
+        'forgotten-village': [
+          { id: 'village-1', title: 'Temukan Kesalahan', type: 'finderror', question: 'Pilih bagian kode yang salah.', options: ['let umur = 18;', 'if (umur > 17) {', 'console.log("Sudah dewasa")', 'return umur = 17;'], answer: 'return umur = 17;', explanation: 'return tidak seharusnya mengisi variabel di dalam return dengan tanda sama dengan.' },
+          { id: 'village-2', title: 'Pola Penalaran', type: 'logic', question: 'Semua kucing mengeong. Si Tom adalah kucing. Apa kesimpulan yang benar?', options: ['Tom menghalau tikus', 'Tom mengeong', 'Tom berlari', 'Tom tidak mengeong'], answer: 'Tom mengeong', explanation: 'Dari premis, semua kucing mengeong, maka Tom juga mengeong.' },
+          { id: 'village-3', title: 'Tempat Penyimpanan', type: 'hidden', question: 'Tempat menyimpan data jangka panjang pada komputer adalah...', options: ['RAM', 'Hard drive', 'CPU', 'Monitor'], answer: 'Hard drive', explanation: 'Hard drive adalah media penyimpanan utama untuk file dan data.' },
+          { id: 'village-4', title: 'Urutkan Tindakan', type: 'sequence', question: 'Urutkan langkah mencari informasi di internet.', options: ['Buka browser', 'Ketik kata kunci', 'Tekan Enter', 'Baca hasil'], answer: ['Buka browser', 'Ketik kata kunci', 'Tekan Enter', 'Baca hasil'], explanation: 'Proses pencarian dimulai dari browser, lalu membaca hasil yang muncul.' },
+          { id: 'village-guardian', title: 'Guardian Challenge', type: 'code', question: 'Pilih pernyataan yang benar tentang HTML.', options: ['Merupakan bahasa markup untuk struktur halaman web', 'Merupakan bahasa pemrograman runtime', 'Mengolah database', 'Hanya untuk animasi'], answer: 'Merupakan bahasa markup untuk struktur halaman web', explanation: 'HTML berfungsi sebagai struktur konten halaman web.', guardian: true }
+        ],
+        'shadow-castle': [
+          { id: 'castle-1', title: 'Kode HTML', type: 'code', question: 'Tag yang benar untuk judul utama adalah...', options: ['<h1>', '<p>', '<div>', '<img>'], answer: '<h1>', explanation: '<h1> adalah tag heading utama dalam struktur halaman web.' },
+          { id: 'castle-2', title: 'Pasangkan Tag', type: 'matching', question: 'Tag <p> digunakan untuk...', options: ['Paragraf', 'Judul besar', 'Tautan', 'Gambar'], answer: 'Paragraf', explanation: '<p> menandai sebuah paragraf di halaman web.' },
+          { id: 'castle-3', title: 'Urutkan Logika', type: 'sequence', question: 'Urutkan cara menulis CSS yang benar.', options: ['Tentukan selector', 'Tambahkan properti', 'Atur nilai', 'Hubungkan file CSS'], answer: ['Tentukan selector', 'Tambahkan properti', 'Atur nilai', 'Hubungkan file CSS'], explanation: 'CSS dibuat dari selector lalu properti, nilai, dan dihubungkan ke halaman.' },
+          { id: 'castle-4', title: 'Teka-teki Logika', type: 'riddle', question: 'Aku akan membantu tampilan website menjadi menarik. Aku mengubah warna, ukuran, dan jarak. Aku adalah...', options: ['HTML', 'CSS', 'JavaScript', 'Database'], answer: 'CSS', explanation: 'CSS adalah bahasa untuk desain tata letak dan estetika halaman web.' },
+          { id: 'castle-guardian', title: 'Guardian Challenge', type: 'logic', question: 'Jika x = 3 dan y = x + 4, maka y adalah...', options: ['4', '5', '7', '9'], answer: '7', explanation: '3 + 4 = 7, jadi y = 7.', guardian: true }
+        ],
+        'misty-swamp': [
+          { id: 'swamp-1', title: 'Cari Error', type: 'finderror', question: 'Pilih bagian yang salah: let total = 10; if (total > 5) { console.log("Menang"); }', options: ['let total = 10;', 'if (total > 5) {', 'console.log("Menang");', 'return total;'], answer: 'return total;', explanation: 'Kode di sini tidak membutuhkan return, jadi itu tidak sesuai dengan konteks logika yang dijalankan.' },
+          { id: 'swamp-2', title: 'Pola Percabangan', type: 'logic', question: 'Jika cuaca hujan, maka saya memakai payung. Saat hari ini hujan, apa yang terjadi?', options: ['Saya memakai payung', 'Saya memakai topi', 'Saya tidur', 'Saya tidak memakai apa pun'], answer: 'Saya memakai payung', explanation: 'Kondisi benar membuahkan tindakan yang sesuai, yaitu memakai payung.' },
+          { id: 'swamp-3', title: 'Susun Loop', type: 'dragdrop', question: 'Urutkan cara kerja perulangan sederhana.', options: ['Mulai', 'Cek kondisi', 'Lakukan aksi', 'Ulangi sampai selesai'], answer: ['Mulai', 'Cek kondisi', 'Lakukan aksi', 'Ulangi sampai selesai'], explanation: 'Perulangan mengecek kondisi lalu menjalankan aksi berulang sampai kondisi terpenuhi.' },
+          { id: 'swamp-4', title: 'Temukan Objek', type: 'hidden', question: 'Objek yang paling tepat merepresentasikan kondisi adalah...', options: ['Penggaris', 'Tombol if', 'Kipas angin', 'Mouse'], answer: 'Tombol if', explanation: 'if adalah struktur kondisi yang menentukan alur program berdasarkan keputusan.' },
+          { id: 'swamp-guardian', title: 'Guardian Challenge', type: 'logic', question: 'Semua burung bisa terbang. Elang adalah burung. Maka...', options: ['Elang bisa terbang', 'Elang tidak bisa terbang', 'Elang hanya berlari', 'Semua burung tidur'], answer: 'Elang bisa terbang', explanation: 'Semua burung bisa terbang, maka elang juga dapat terbang.', guardian: true }
+        ],
+        'lost-kingdom': [
+          { id: 'kingdom-1', title: 'Algoritma', type: 'code', question: 'Contoh algoritma paling sederhana adalah...', options: ['Langkah-langkah memasak mie', 'Satu baris kode', 'Warna halaman', 'Ukuran file'], answer: 'Langkah-langkah memasak mie', explanation: 'Algoritma adalah urutan langkah untuk mencapai tujuan tertentu.' },
+          { id: 'kingdom-2', title: 'Gabungkan Pemahaman', type: 'matching', question: 'Apa arti debugging?', options: ['Mencari dan memperbaiki bug', 'Mengunci program', 'Menyimpan data', 'Memasang jaringan'], answer: 'Mencari dan memperbaiki bug', explanation: 'Debugging adalah proses menemukan dan memperbaiki kesalahan pada program.' },
+          { id: 'kingdom-3', title: 'Atur Tindakan', type: 'dragdrop', question: 'Susun urutan pemecahan masalah yang benar.', options: ['Identifikasi masalah', 'Coba solusi', 'Uji hasil', 'Perbaiki jika gagal'], answer: ['Identifikasi masalah', 'Coba solusi', 'Uji hasil', 'Perbaiki jika gagal'], explanation: 'Pemecahan masalah dimulai dari menemukan akar masalah lalu menguji solusi.' },
+          { id: 'kingdom-4', title: 'Riddle Akhir', type: 'riddle', question: 'Aku membantu program berpikir, mengatur keputusan, dan memecahkan masalah. Aku adalah...', options: ['Algoritma', 'Server', 'Mouse', 'Printer'], answer: 'Algoritma', explanation: 'Algoritma adalah langkah logika yang memberi arah kepada komputer saat menyelesaikan tugas.' },
+          { id: 'kingdom-guardian', title: 'Guardian Challenge', type: 'logic', question: 'Jika semua pengetahuan adalah cahaya, dan kamu terus belajar, maka...', options: ['Kamu memperkuat jalanmu', 'Kamu berhenti bergerak', 'Kamu kehilangan arah', 'Kamu tidak lagi penasaran'], answer: 'Kamu memperkuat jalanmu', explanation: 'Pengetahuan memberi arah dan kekuatan saat menghadapi misteri.', guardian: true }
+        ]
+      };
+
+      const DEFAULT_STATE = {
+        playerName: 'Explorer',
+        currentWorld: 'sunny-meadow',
+        unlockedWorlds: ['sunny-meadow'],
+        completedMissions: {},
+        hearts: 3,
+        xp: 0,
+        coins: 28,
+        stars: 0,
+        crystals: 0,
+        level: 1,
+        achievements: 0,
+        playerPos: { x: 12, y: 62 },
+        settings: { musicVolume: 60, sfxVolume: 80, muted: false },
+        activeMission: null,
+        challengeLocked: false,
+        challengeSequence: [],
+        challengeDragOrder: [],
+        storyIndex: 0
+      };
+
+      function normalizeAnswer(value) {
+        return String(value ?? '').replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+      }
+
+      const STORAGE_KEY = 'wonderland-save-v1';
+      const state = loadGame();
+      const audio = {
+        context: null,
+        musicGain: null,
+        musicStart: false,
+        started: false,
+        ensureContext() {
+          if (!this.context) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return null;
+            this.context = new AudioCtx();
+            this.musicGain = this.context.createGain();
+            this.musicGain.gain.value = 0.05;
+            this.musicGain.connect(this.context.destination);
+          }
+          if (this.context.state === 'suspended') this.context.resume();
+          return this.context;
+        },
+        startMusic() {
+          if (this.musicStart || !this.ensureContext()) return;
+          const ctx = this.ensureContext();
+          const oscA = ctx.createOscillator();
+          const oscB = ctx.createOscillator();
+          const gain = ctx.createGain();
+          oscA.type = 'sine';
+          oscB.type = 'triangle';
+          oscA.frequency.value = 196;
+          oscB.frequency.value = 293.66;
+          gain.gain.value = 0.0001;
+          oscA.connect(gain); oscB.connect(gain); gain.connect(this.musicGain);
+          const now = ctx.currentTime;
+          oscA.start(now); oscB.start(now);
+          gain.gain.linearRampToValueAtTime(0.07 * (state.settings.musicVolume / 100 || 0.6), now + 0.5);
+          oscA.frequency.linearRampToValueAtTime(196, now + 1.5);
+          oscB.frequency.linearRampToValueAtTime(293.66, now + 1.5);
+          this.musicOsc = { oscA, oscB, gain };
+          this.musicStart = true;
+          this.started = true;
+        },
+        playTone(freq, duration = 0.14, type = 'sine', volume = 0.05) {
+          if (state.settings.muted) return;
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = type;
+          osc.frequency.value = freq;
+          gainNode.gain.value = volume * (state.settings.sfxVolume / 100 || 0.8);
+          osc.connect(gainNode); gainNode.connect(ctx.destination);
+          const now = ctx.currentTime;
+          osc.start(now);
+          osc.stop(now + duration);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        },
+        click() { this.playTone(420, 0.08, 'triangle', 0.04); },
+        success() { this.playTone(660, 0.1, 'triangle', 0.05); setTimeout(() => this.playTone(820, 0.14, 'triangle', 0.05), 80); },
+        failure() { this.playTone(180, 0.18, 'sawtooth', 0.07); },
+        win() { this.playTone(523.25, 0.2, 'triangle', 0.07); setTimeout(() => this.playTone(659.25, 0.22, 'triangle', 0.07), 150); setTimeout(() => this.playTone(783.99, 0.24, 'triangle', 0.08), 320); },
+        reward() { this.playTone(540, 0.1, 'triangle', 0.06); setTimeout(() => this.playTone(700, 0.12, 'triangle', 0.07), 120); }
+      };
+
+      function loadGame() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return structuredClone(DEFAULT_STATE);
+          const saved = JSON.parse(raw);
+          return { ...structuredClone(DEFAULT_STATE), ...saved, settings: { ...DEFAULT_STATE.settings, ...(saved.settings || {}) } };
+        } catch (error) {
+          return structuredClone(DEFAULT_STATE);
+        }
+      }
+
+      function saveGame() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function showScreen(name) {
+        document.querySelectorAll('.screen').forEach(screen => {
+          screen.classList.toggle('active', screen.id === name);
+        });
+      }
+
+      function toast(message) {
+        const toastEl = document.getElementById('toast');
+        toastEl.textContent = message;
+        toastEl.classList.remove('hidden');
+        clearTimeout(toastEl.timer);
+        toastEl.timer = setTimeout(() => toastEl.classList.add('hidden'), 1800);
+      }
+
+      function showMenu() {
+        showScreen('menu');
+        renderProfile();
+      }
+
+      function showStory() {
+        const storyMessages = [
+          'WONDERLAND dahulu merupakan dunia yang indah dan penuh pengetahuan. Enam kristal suci menjaga keseimbangan alam dan akal budi.',
+          'Namun ketika kristal-kristal itu kehilangan cahaya, kabut misterius menyelimuti wilayah-wilayah paling indah di dunia.',
+          'Kamu menjadi penjelajah yang dipilih untuk mengembalikan cahaya pengetahuan. Setiap wilayah menantimu dengan teka-teki, misteri, dan penjaga yang tak mudah dikalahkan.'
+        ];
+        const storyText = document.getElementById('storyText');
+        storyText.innerHTML = `<p>${storyMessages[state.storyIndex % storyMessages.length]}</p>`;
+        state.storyIndex += 1;
+        showScreen('story');
+      }
+
+      function startNewGame() {
+        const fresh = structuredClone(DEFAULT_STATE);
+        Object.assign(state, fresh);
+        state.currentWorld = 'sunny-meadow';
+        state.unlockedWorlds = ['sunny-meadow'];
+        state.playerPos = { x: 12, y: 62 };
+        state.hearts = 3;
+        saveGame();
+        audio.startMusic();
+        showStory();
+      }
+
+      function continueGame() {
+        const loaded = loadGame();
+        Object.assign(state, loaded);
+        state.playerPos = state.playerPos || { x: 12, y: 62 };
+        saveGame();
+        renderMap();
+        renderExplore();
+        showScreen('mapScreen');
+      }
+
+      function renderProfile() {
+        document.getElementById('profileName').textContent = state.playerName;
+        document.getElementById('profileLevel').textContent = state.level;
+        document.getElementById('profileXp').textContent = state.xp;
+        document.getElementById('profileCoins').textContent = state.coins;
+        document.getElementById('profileCrystals').textContent = state.crystals;
+        document.getElementById('profileStars').textContent = state.stars;
+        document.getElementById('profileAchievements').textContent = state.achievements;
+        document.getElementById('profileWorlds').textContent = `${state.unlockedWorlds.length}/6`;
+        const avatarBox = document.getElementById('profileAvatar');
+        avatarBox.textContent = state.playerName.charAt(0).toUpperCase() || 'A';
+      }
+
+      function renderMap() {
+        const worldMap = document.getElementById('worldMap');
+        worldMap.innerHTML = WORLD_DATA.map(world => {
+          const unlocked = state.unlockedWorlds.includes(world.id);
+          const active = state.currentWorld === world.id;
+          return `
+            <button type="button" class="region-card ${unlocked ? '' : 'locked'} ${active ? 'active' : ''}" data-world-id="${world.id}" style="left:${world.x}%; top:${world.y}%">
+              <span class="dot" style="background:${world.accent};"></span>
+              <strong>${world.name}</strong>
+              <small>${world.subtitle}</small>
+            </button>
+          `;
+        }).join('');
+      }
+
+      function openWorld(id) {
+        const unlocked = state.unlockedWorlds.includes(id);
+        if (!unlocked) {
+          toast('Wilayah ini masih terkunci. Selesaikan misi sebelumnya terlebih dahulu.');
+          return;
+        }
+        state.currentWorld = id;
+        state.playerPos = { x: 12, y: 62 };
+        saveGame();
+        renderExplore();
+        showScreen('exploreScreen');
+      }
+
+      function renderExplore() {
+        const world = WORLD_DATA.find(item => item.id === state.currentWorld);
+        const exploreScene = document.getElementById('exploreScene');
+        exploreScene.className = `explore-scene world-${world.id}`;
+        const missionLayer = document.getElementById('missionLayer');
+        const missions = CHALLENGE_BANK[state.currentWorld] || [];
+        missionLayer.innerHTML = missions.map((mission, index) => {
+          const x = 18 + (index % 4) * 16 + (index * 5) % 10;
+          const y = 18 + Math.floor(index / 2) * 16 + (index * 8) % 12;
+          return `<button type="button" class="mission-marker" data-mission-id="${mission.id}" style="left:${x}%; top:${y}%"></button>`;
+        }).join('');
+
+        const player = document.getElementById('playerAvatar');
+        player.style.left = `${state.playerPos.x}%`;
+        player.style.top = `${state.playerPos.y}%`;
+      }
+
+      function movePlayer(dir) {
+        const step = 6;
+        const nextPos = { ...state.playerPos };
+        if (dir === 'up') nextPos.y -= step;
+        if (dir === 'down') nextPos.y += step;
+        if (dir === 'left') nextPos.x -= step;
+        if (dir === 'right') nextPos.x += step;
+
+        nextPos.x = Math.min(88, Math.max(8, nextPos.x));
+        nextPos.y = Math.min(82, Math.max(14, nextPos.y));
+        state.playerPos = nextPos;
+        saveGame();
+
+        const player = document.getElementById('playerAvatar');
+        player.classList.add('walking');
+        setTimeout(() => player.classList.remove('walking'), 180);
+        player.style.left = `${nextPos.x}%`;
+        player.style.top = `${nextPos.y}%`;
+
+        const nearby = nearestMission();
+        if (nearby) {
+          toast(`Misi dekat: ${nearby.title}`);
+        }
+      }
+
+      function nearestMission() {
+        const missions = CHALLENGE_BANK[state.currentWorld] || [];
+        if (!missions.length) return null;
+        const player = state.playerPos;
+        let best = null;
+        let bestDistance = Number.MAX_SAFE_INTEGER;
+        missions.forEach((mission, index) => {
+          const x = 18 + (index % 4) * 16 + (index * 5) % 10;
+          const y = 18 + Math.floor(index / 2) * 16 + (index * 8) % 12;
+          const dist = Math.abs(player.x - x) + Math.abs(player.y - y);
+          if (dist < bestDistance) {
+            best = mission;
+            bestDistance = dist;
+          }
+        });
+        return bestDistance < 26 ? best : null;
+      }
+
+      function openMission(id) {
+        const mission = (CHALLENGE_BANK[state.currentWorld] || []).find(item => item.id === id);
+        if (!mission) return;
+        state.activeMission = mission;
+        state.challengeSequence = [];
+        state.challengeDragOrder = [];
+        renderChallenge();
+        showScreen('challengeScreen');
+      }
+
+      function renderChallenge() {
+        const mission = state.activeMission;
+        if (!mission) return;
+
+        state.challengeLocked = false;
+
+        document.getElementById('challengeType').textContent = mission.guardian ? 'Guardian Challenge' : 'Misi';
+        document.getElementById('challengeTitle').textContent = mission.title;
+        renderLives();
+
+        const content = document.getElementById('challengeContent');
+        switch (mission.type) {
+          case 'matching':
+          case 'logic':
+          case 'hidden':
+          case 'finderror':
+          case 'code': {
+            content.innerHTML = `
+              <div class="challenge-card">
+                <h4>${mission.question}</h4>
+                <div class="option-grid">
+                  ${mission.options.map(option => `<button class="option-btn" type="button" data-choice="${option}">${option}</button>`).join('')}
+                </div>
+              </div>
+            `;
+            content.querySelectorAll('.option-btn').forEach(button => {
+              button.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                submitChoice(button.dataset.choice);
+              });
+            });
+            break;
+          }
+          case 'sequence': {
+            content.innerHTML = `
+              <div class="challenge-card">
+                <h4>${mission.question}</h4>
+                <div class="sequence-list" id="sequenceList"></div>
+                <div class="sequence-list" id="sequencePreview" style="margin-top:1rem;"></div>
+                <div class="challenge-footer" style="margin-top:1rem;">
+                  <span id="sequenceHint">Klik langkah yang benar untuk menyusun urutan.</span>
+                  <button class="primary" type="button" data-action="submit-sequence">Submit</button>
+                </div>
+              </div>
+            `;
+            const sequenceList = document.getElementById('sequenceList');
+            sequenceList.innerHTML = mission.options.map(option => `<button class="sequence-item" type="button" data-sequence-option="${option}">${option}</button>`).join('');
+            sequenceList.querySelectorAll('[data-sequence-option]').forEach(button => {
+              button.addEventListener('click', () => {
+                const option = button.dataset.sequenceOption;
+                const existingIndex = state.challengeSequence.indexOf(option);
+                if (existingIndex >= 0) {
+                  state.challengeSequence.splice(existingIndex, 1);
+                } else {
+                  state.challengeSequence.push(option);
+                }
+                updateSequencePreview();
+              });
+            });
+            updateSequencePreview();
+            break;
+          }
+          case 'dragdrop': {
+            const slots = mission.options.length;
+            content.innerHTML = `
+              <div class="challenge-card">
+                <h4>${mission.question}</h4>
+                <div class="drag-surface">
+                  <div class="drag-options">
+                    ${mission.options.map(option => `<button class="drag-piece" draggable="true" data-piece="${option}" type="button">${option}</button>`).join('')}
+                  </div>
+                  <div class="drop-slots">
+                    ${Array.from({ length: slots }, () => '<div class="drop-slot">Drop</div>').join('')}
+                  </div>
+                  <button class="primary" type="button" data-action="submit-dragdrop">Submit</button>
+                </div>
+              </div>
+            `;
+            bindDragDrop();
+            break;
+          }
+          case 'riddle': {
+            content.innerHTML = `
+              <div class="challenge-card">
+                <h4>${mission.question}</h4>
+                <input class="text-input" id="riddleInput" placeholder="Tulis jawabanmu" />
+                <div class="challenge-footer" style="margin-top:1rem;">
+                  <span></span>
+                  <button class="primary" type="button" data-action="submit-riddle">Jawab</button>
+                </div>
+              </div>
+            `;
+            break;
+          }
+          default:
+            content.innerHTML = '<div class="challenge-card"><h4>Tantangan belum tersedia.</h4></div>';
+            break;
+        }
+      }
+
+      function updateSequencePreview() {
+        const preview = document.getElementById('sequencePreview');
+        if (!preview) return;
+        preview.innerHTML = state.challengeSequence.length ? state.challengeSequence.map(item => `<span class="sequence-item">${item}</span>`).join('') : '<span class="sequence-item">Belum ada urutan</span>';
+      }
+
+      function bindDragDrop() {
+        const pieces = document.querySelectorAll('.drag-piece');
+        const slots = document.querySelectorAll('.drop-slot');
+        pieces.forEach(piece => {
+          piece.addEventListener('dragstart', (event) => {
+            event.dataTransfer.setData('text/plain', piece.dataset.piece);
+          });
+          piece.addEventListener('click', () => addToDrop(piece.dataset.piece));
+        });
+        slots.forEach((slot, index) => {
+          slot.addEventListener('dragover', e => e.preventDefault());
+          slot.addEventListener('drop', e => {
+            e.preventDefault();
+            const value = e.dataTransfer.getData('text/plain');
+            addToDrop(value, index);
+          });
+        });
+      }
+
+      function addToDrop(value, index) {
+        const existingIndex = state.challengeDragOrder.indexOf(value);
+        if (existingIndex >= 0) state.challengeDragOrder.splice(existingIndex, 1);
+        if (typeof index === 'number') {
+          state.challengeDragOrder[index] = value;
+        } else {
+          state.challengeDragOrder.push(value);
+        }
+
+        const slots = document.querySelectorAll('.drop-slot');
+        slots.forEach((slot, slotIndex) => {
+          slot.textContent = state.challengeDragOrder[slotIndex] || 'Drop';
+        });
+      }
+
+      function submitChoice(answer) {
+        const mission = state.activeMission;
+        if (!mission || state.challengeLocked) return;
+        state.challengeLocked = true;
+
+        const normalizedAnswer = normalizeAnswer(answer);
+        const normalizedCorrect = normalizeAnswer(mission.answer);
+        const buttons = document.querySelectorAll('.option-btn');
+        buttons.forEach(button => {
+          button.disabled = true;
+          if (normalizeAnswer(button.dataset.choice) === normalizedCorrect) button.classList.add('correct');
+          if (normalizeAnswer(button.dataset.choice) === normalizedAnswer && normalizedAnswer !== normalizedCorrect) button.classList.add('wrong');
+        });
+
+        if (normalizedAnswer === normalizedCorrect) {
+          setTimeout(() => finishMission(mission), 450);
+        } else {
+          setTimeout(() => handleWrongAnswer(), 450);
+        }
+      }
+
+      function finishMission(mission) {
+        audio.success();
+        state.completedMissions = state.completedMissions || {};
+        state.completedMissions[mission.id] = true;
+        state.hearts = Math.min(3, state.hearts || 3);
+        const baseXp = mission.guardian ? 80 : 28;
+        const baseCoins = mission.guardian ? 18 : 8;
+        const baseStars = mission.guardian ? 2 : 1;
+        state.xp += baseXp;
+        state.coins += baseCoins;
+        state.stars += baseStars;
+        state.level = Math.max(1, Math.floor(state.xp / 100) + 1);
+        state.achievements += 1;
+
+        if (mission.guardian) {
+          state.crystals += 1;
+          const worldIndex = WORLD_DATA.findIndex(item => item.id === state.currentWorld);
+          const nextWorld = WORLD_DATA[worldIndex + 1];
+          if (nextWorld && !state.unlockedWorlds.includes(nextWorld.id)) {
+            state.unlockedWorlds.push(nextWorld.id);
+          }
+          state.hearts = 3;
+          showVictory(mission);
+        } else {
+          toast(`Jawaban benar! +${baseXp} XP, +${baseCoins} koin, +${baseStars} bintang.`);
+          saveGame();
+          renderProfile();
+          showScreen('exploreScreen');
+        }
+        saveGame();
+      }
+
+      function handleWrongAnswer() {
+        state.hearts = Math.max(0, (state.hearts || 3) - 1);
+        audio.failure();
+        renderLives();
+        saveGame();
+        if (state.hearts <= 0) {
+          const world = WORLD_DATA.find(item => item.id === state.currentWorld);
+          document.getElementById('defeatText').textContent = `Kamu kehilangan semua hati di ${world.name}. Coba ulang dari checkpoint.`;
+          showScreen('defeatScreen');
+          return;
+        }
+        toast('Jawaban salah! Kamu kehilangan 1 hati.');
+      }
+
+      function renderLives() {
+        const node = document.getElementById('challengeLives');
+        if (!node) return;
+        const hearts = Array.from({ length: 3 }, (_, i) => i < (state.hearts || 3) ? '❤' : '♡').join('');
+        node.innerHTML = hearts;
+      }
+
+      function showVictory(mission) {
+        const world = WORLD_DATA.find(item => item.id === state.currentWorld);
+        document.getElementById('victoryWorld').textContent = world.name;
+        document.getElementById('victoryQuote').textContent = world.quote;
+        document.getElementById('victoryRewards').innerHTML = `
+          <span class="reward-pill">XP +80</span>
+          <span class="reward-pill">Koin +18</span>
+          <span class="reward-pill">Kristal ${world.name}</span>
+        `;
+        audio.win();
+        showScreen('victoryScreen');
+        renderProfile();
+      }
+
+      function retryMission() {
+        state.hearts = 3;
+        saveGame();
+        renderLives();
+        renderChallenge();
+        showScreen('challengeScreen');
+      }
+
+      function giveHint() {
+        const mission = state.activeMission;
+        if (!mission) return;
+        const hints = {
+          matching: 'Perhatikan kata kunci dan fungsi utama dari istilah.',
+          logic: 'Cari pola atau hubungan logis yang konsisten.',
+          code: 'Ingat sintaks dasar: variabel, kondisi, dan tag HTML.',
+          hidden: 'Pilih benda yang paling erat hubungannya dengan petunjuk.',
+          riddle: 'Baca pertanyaan dengan teliti dan fokus pada fungsi utamanya.',
+          sequence: 'Langkah yang tepat biasanya mengikuti alur dari awal hingga hasil.',
+          dragdrop: 'Susun urutan yang paling masuk akal dan berurutan.',
+          finderror: 'Cari bagian yang tidak sesuai aturan atau logika program.'
+        };
+        toast(hints[mission.type] || 'Kamu sudah dekat, lanjutkan dengan fokus.');
+      }
+
+      function submitSequence() {
+        const mission = state.activeMission;
+        if (!mission) return;
+        if (state.challengeSequence.length !== mission.answer.length) {
+          toast('Urutkan semua langkah sebelum submit.');
+          return;
+        }
+        const correct = JSON.stringify(state.challengeSequence.map(item => normalizeAnswer(item))) === JSON.stringify(mission.answer.map(item => normalizeAnswer(item)));
+        if (correct) {
+          finishMission(mission);
+        } else {
+          handleWrongAnswer();
+        }
+      }
+
+      function submitDragDrop() {
+        const mission = state.activeMission;
+        if (!mission) return;
+        if (state.challengeDragOrder.length !== mission.answer.length) {
+          toast('Semua potongan harus diposisikan.');
+          return;
+        }
+        const correct = JSON.stringify(state.challengeDragOrder.map(item => normalizeAnswer(item))) === JSON.stringify(mission.answer.map(item => normalizeAnswer(item)));
+        if (correct) {
+          finishMission(mission);
+        } else {
+          handleWrongAnswer();
+        }
+      }
+
+      function submitRiddle() {
+        const mission = state.activeMission;
+        const input = document.getElementById('riddleInput');
+        const answer = (input ? input.value : '').trim();
+        if (!answer) {
+          toast('Jawaban tidak boleh kosong.');
+          return;
+        }
+        if (normalizeAnswer(answer) === normalizeAnswer(mission.answer)) {
+          finishMission(mission);
+        } else {
+          handleWrongAnswer();
+        }
+      }
+
+      function handleAction(action, el) {
+        audio.startMusic();
+        audio.click();
+        switch (action) {
+          case 'new-game':
+            startNewGame();
+            break;
+          case 'continue-game':
+            continueGame();
+            break;
+          case 'show-menu':
+            showMenu();
+            break;
+          case 'skip-story':
+            showScreen('mapScreen');
+            break;
+          case 'next-story':
+            showScreen('mapScreen');
+            break;
+          case 'open-settings':
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.remove('hidden');
+            document.getElementById('musicVolume').value = state.settings.musicVolume;
+            document.getElementById('sfxVolume').value = state.settings.sfxVolume;
+            document.getElementById('muteToggle').checked = !!state.settings.muted;
+            break;
+          case 'close-settings':
+            document.getElementById('settingsPanel').classList.add('hidden');
+            saveGame();
+            break;
+          case 'open-credits':
+            toast('WONDERLAND — game edukasi petualangan berbasis pengetahuan dan misteri.');
+            break;
+          case 'open-profile':
+            renderProfile();
+            document.getElementById('profilePanel').classList.remove('hidden');
+            break;
+          case 'close-profile':
+            document.getElementById('profilePanel').classList.add('hidden');
+            break;
+          case 'return-map':
+            renderMap();
+            showScreen('mapScreen');
+            break;
+          case 'give-hint':
+            giveHint();
+            break;
+          case 'leave-challenge':
+            if (confirm('Keluar dari misi? Progress misi tidak akan ditambah.')) {
+              showScreen('exploreScreen');
+            }
+            break;
+          case 'retry-mission':
+            retryMission();
+            break;
+          case 'continue-victory':
+            renderMap();
+            showScreen('mapScreen');
+            break;
+          case 'submit-sequence':
+            submitSequence();
+            break;
+          case 'submit-dragdrop':
+            submitDragDrop();
+            break;
+          case 'submit-riddle':
+            submitRiddle();
+            break;
+          case 'move':
+            if (el) movePlayer(el.dataset.dir);
+            break;
+          default:
+            break;
+        }
+      }
+
+      function setupBindings() {
+        document.addEventListener('click', (event) => {
+          const actionButton = event.target.closest('[data-action]');
+          if (actionButton) {
+            handleAction(actionButton.dataset.action, actionButton);
+            return;
+          }
+
+          const region = event.target.closest('.region-card');
+          if (region) {
+            openWorld(region.dataset.worldId);
+            return;
+          }
+
+          const marker = event.target.closest('.mission-marker');
+          if (marker) {
+            openMission(marker.dataset.missionId);
+          }
+        });
+
+        document.addEventListener('keydown', (event) => {
+          const key = event.key.toLowerCase();
+          if (key === 'w' || key === 'arrowup') movePlayer('up');
+          if (key === 's' || key === 'arrowdown') movePlayer('down');
+          if (key === 'a' || key === 'arrowleft') movePlayer('left');
+          if (key === 'd' || key === 'arrowright') movePlayer('right');
+        });
+
+        document.getElementById('musicVolume').addEventListener('input', (event) => {
+          const value = Number(event.target.value);
+          state.settings.musicVolume = value;
+          if (audio.musicGain) {
+            audio.musicGain.gain.value = 0.07 * (value / 100 || 0.6);
+          }
+          saveGame();
+        });
+
+        document.getElementById('sfxVolume').addEventListener('input', (event) => {
+          state.settings.sfxVolume = Number(event.target.value);
+          saveGame();
+        });
+
+        document.getElementById('muteToggle').addEventListener('change', (event) => {
+          state.settings.muted = event.target.checked;
+          saveGame();
+        });
+      }
+
+      function init() {
+        setupBindings();
+        renderMap();
+        renderProfile();
+        renderExplore();
+        showScreen('menu');
+        setTimeout(() => {
+          document.getElementById('splash').classList.remove('active');
+          showScreen('menu');
+        }, 1800);
+      }
+
+      init();
+    </script>
+  </body>
+</html>
